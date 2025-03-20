@@ -3,7 +3,11 @@
 # -*- coding: utf-8 -*-
 
 
-############################################# Bugs:
+###################### Changes:
+#Minor improvement to handle some resolvconf issues
+
+
+##################### Bugs:
 
 
 
@@ -262,8 +266,21 @@ class SystemUtils:
             return True
         except subprocess.CalledProcessError as e:
             err_output = e.stderr.strip() if e.stderr else ""
+            
+            ignorable_errors = [
+                "resolvconf",
+                "dpkg --configure",
+                "--force-help",
+                "apt does not have a stable CLI interface"
+            ]
+            
+            if any(err in err_output for err in ignorable_errors):
+                print(f"⚠️ Ignored non-critical error: {err_output}")
+                return True
+            
             print(f"{error_message}: {err_output}")
             return False
+
 
 
 
@@ -739,14 +756,11 @@ class Remover:
 
     @staticmethod
     def fix_apt_issues():
-
         Logger.info("Checking APT Issues | Preparing system...")
 
 
         SystemUtils.run_command("sudo pkill -SIGTERM -f 'apt|dpkg'", "Terminating APT/DPKG processes")
         time.sleep(2)
-
-
         SystemUtils.run_command("sudo pkill -SIGKILL -f 'apt|dpkg'", "Forcibly terminating APT/DPKG processes")
 
 
@@ -756,14 +770,13 @@ class Remover:
             "/var/lib/dpkg/lock-frontend",
             "/var/cache/apt/archives/lock"
         ]
-
         for lock in locks:
             if SystemUtils.file_exists(lock):
                 SystemUtils.run_command(f"sudo rm -f {lock}", f"Removing lock file {lock}")
 
-
-        SystemUtils.run_command("sudo dpkg --configure -a", "Fixing broken packages")
-
+        SystemUtils.run_command("sudo dpkg --configure -a --force-all", "Forcing package configuration")
+        
+        SystemUtils.run_command("sudo apt-mark hold resolvconf", "Blocking resolvconf operations")
 
 
 
