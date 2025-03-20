@@ -66,8 +66,8 @@ install_dependencies() {
         apt-transport-https ca-certificates 
         curl wget sudo ed
         python3 python3-pip python3-venv
-        iptables iproute2 ipset 
-        netcat-traditional conntrack resolvconf
+        iptables iproute2 ipset
+        netcat-traditional conntrack
         build-essential git automake autoconf libtool
         jq logrotate attr dnsutils
     )
