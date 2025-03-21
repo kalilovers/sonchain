@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.0.1 (Error Ignore Fix)
+# Version: 1.0.2 (Resilient Update)
 # License: MIT
 
 set -euo pipefail
@@ -74,15 +74,16 @@ install_dependencies() {
 
     echo -e "${GREEN}Updating package lists...${NC}"
     sudo apt-get update -qq 2>/dev/null || {
-        echo -e "${RED}Failed to update package lists!${NC}" >&2
-        exit 1
+        echo -e "${YELLOW}Warning: Some package lists failed to update, continuing anyway...${NC}" >&2
     }
 
     echo -e "${GREEN}Installing required packages...${NC}"
     sudo apt-get install -y --no-install-recommends -qq \
         -o Dpkg::Options::="--force-confold" \
         -o Dpkg::Options::="--force-unsafe-io" \
-        "${PKGS[@]}" 2>/dev/null || true
+        "${PKGS[@]}" 2>/dev/null || {
+        echo -e "${YELLOW}Warning: Some packages may have failed to install${NC}" >&2
+    }
 
     echo -e "${GREEN}Installing Python packages...${NC}"
     python3 -m pip install --user --disable-pip-version-check --no-warn-script-location \
@@ -102,11 +103,10 @@ install_dependencies() {
     done
 
     if [ ${#missing[@]} -gt 0 ]; then
-        echo -e "${RED}Missing components: ${missing[*]}${NC}" >&2
-        exit 1
+        die "Missing critical components: ${missing[*]}"
     fi
 
-    echo -e "\n${GREEN}All dependencies installed successfully!${NC}"
+    echo -e "\n${GREEN}All critical dependencies verified!${NC}"
 }
 
 setup_application() {
