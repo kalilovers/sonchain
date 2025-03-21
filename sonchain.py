@@ -3,9 +3,12 @@
 # -*- coding: utf-8 -*-
 
 
-###################### Changes:
-#Minor improvement to handle some resolvconf issues
+###################### v1.1 Changes:
 
+#Minor changes:
+#Fixed some issues with Proxyson
+#Fixed some issues with Dnsson
+#handle some resolvconf issues
 
 ##################### Bugs:
 
@@ -1577,7 +1580,7 @@ class StatusManager:
         
         content = SystemUtils.read_file(script_path)
         dest_match = re.search(r'--to-destination\s+([\d\.]+:\d+)', content)
-        cmd_match = re.search(r'exec\s+(\S+)\s+"\$@"', content)
+        cmd_match = re.search(r'^\s*(\S+)\s+"\$@"\s*$', content, re.MULTILINE)
         
         print("\n ✅Installed | Settings:")
         print(f"{color.BORDER_COLOR}   │{color.RESET}▸ Destination: {dest_match.group(1) if dest_match else '❌Not found'}")
@@ -4214,7 +4217,6 @@ class DnssonManager:
  
  
  
- 
     @staticmethod
     def create_dnsson_script(dns_ip, dns_port):
 
@@ -4226,7 +4228,6 @@ class DnssonManager:
 #
 set -e
 set -o pipefail
-
 
 RED='\\033[1;91m'
 GREEN='\\033[1;92m'
@@ -4244,9 +4245,9 @@ cleanup() {{
     if [ "$CLEANED" -eq 1 ]; then
         exit $?
     fi
-    
+
     echo -e "\\n${{GREEN}}[—————Command Finished———————————] ${{RESET}}\\n" >&2
-    
+
     CLEANED=1
     local status=$?
     log "${{BLUE}}Starting Cleanup...${{RESET}}"
@@ -4344,33 +4345,16 @@ log "${{GREEN}}Iptables DNAT Rules added Successfully.${{RESET}}"
 
 echo -e "\\n${{GREEN}}[—————Running Your Command———————] ${{RESET}}\\n" >&2
 
-FORCE_KILL=0
-handle_sigint() {{
-    FORCE_KILL=$((FORCE_KILL+1))
-    if [ "$FORCE_KILL" -eq 1 ]; then
-         log "${{BLUE}}SIGINT received, sending SIGTERM to command group...${{RESET}}"
-         kill -TERM -$CHILD_PID 2>/dev/null || true
-    else
-         log "${{RED}}Second SIGINT received, sending SIGKILL to command group...${{RESET}}"
-         kill -KILL -$CHILD_PID 2>/dev/null || true
-    fi
-}}
-trap handle_sigint SIGINT
-
-log "${{BLUE}}Running Command: $*${{RESET}}"
-( exec "$@" ) &
-CHILD_PID=$!
-wait $CHILD_PID
+echo "Running command: $*" >&2
+"$@"
 CMD_STATUS=$?
-
 exit $CMD_STATUS
 """
         with open(script_path, "w") as script_file:
             script_file.write(script_content)
         SystemUtils.run_command(f"sudo chmod 750 {script_path}", "Failed to make dnsson executable.")
         print("dnsson script created and configured successfully.")
- 
- 
+
  
  
  
@@ -4633,9 +4617,10 @@ class ProxysonManager:
         
 
         content = re.sub(
-            r'(exec\s+)(\S+)(\s+"\$@")',
-            rf'\g<1>{new_cmd}\g<3>',
-            content
+            r'^\s*(\S+)\s+"\$@"\s*$', 
+            rf'{new_cmd} "$@"', 
+            content,
+            flags=re.MULTILINE
         )
         
         try:
@@ -4656,7 +4641,6 @@ class ProxysonManager:
  
     @staticmethod
     def create_proxyson_script(dns_ip, dns_port, base_command="socksify"):
-
         script_path = "/usr/local/bin/proxyson"
         script_content = f"""#!/bin/bash
 # proxyson wrapper script with robust in-place resolv.conf editing
@@ -4783,31 +4767,15 @@ log "${{GREEN}}Iptables DNAT Rules added Successfully.${{RESET}}"
 
 echo -e "\\n${{GREEN}}[—————Running Your Command———————] ${{RESET}}\\n" >&2
 echo "{base_command}: $*" >&2
-FORCE_KILL=0
-handle_sigint() {{
-    FORCE_KILL=$((FORCE_KILL+1))
-    if [ "$FORCE_KILL" -eq 1 ]; then
-         log "${{BLUE}}SIGINT received, sending SIGTERM to command group...${{RESET}}"
-         kill -TERM -$CHILD_PID 2>/dev/null || true
-    else
-         log "${{RED}}Second SIGINT received, sending SIGKILL to command group...${{RESET}}"
-         kill -KILL -$CHILD_PID 2>/dev/null || true
-    fi
-}}
-trap handle_sigint SIGINT
 
-( exec {base_command} "$@" ) &
-CHILD_PID=$!
-wait $CHILD_PID
+{base_command} "$@"
 CMD_STATUS=$?
-
 exit $CMD_STATUS
 """
         with open(script_path, "w") as script_file:
             script_file.write(script_content)
         SystemUtils.run_command(f"sudo chmod 750 {script_path}", "Failed to make proxyson executable.")
         print("proxyson script created and configured successfully.")
-
 
 
  
@@ -4825,7 +4793,7 @@ class MenuManager:
     def display_main_menu():
         SystemUtils.clear_screen()
         
-        script_version = "v1.0 (Initial Release)"
+        script_version = "v1.1"
         github_link    = "Github.com/Kalilovers"
         
 
