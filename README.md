@@ -6,7 +6,7 @@
 
 <p align="center" dir="rtl">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Version-1.1-green.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.1.2-green.svg" alt="Version">
   <img src="https://img.shields.io/badge/Python->=3.7-blue.svg" alt="Python">
 </p>
 
@@ -39,7 +39,7 @@
 <tr>
 <td>
 
-&#x200F; ****SonChain نسخه 1.1****
+&#x200F; ****SonChain نسخه 1.1.2****
 
 ## 🔍 معرفی و قابلیت‌ها
 
