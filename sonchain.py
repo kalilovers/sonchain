@@ -3,12 +3,9 @@
 # -*- coding: utf-8 -*-
 
 
-###################### v1.1 Changes:
+###################### v1.1.2 Changes:
 
-#Minor changes:
-#Fixed some issues with Proxyson
-#Fixed some issues with Dnsson
-#handle some resolvconf issues
+#new Option > Update Script
 
 ##################### Bugs:
 
@@ -30,9 +27,6 @@ For more details, please refer to the LICENSE file in the project root.
 
 
 
-
-
-
 import os
 import subprocess
 import sys
@@ -47,6 +41,18 @@ import ipaddress
 from contextlib import contextmanager
 import select
 import threading
+
+
+
+
+
+
+
+VERSION = "1.1.2"
+REPO_OWNER = "kalilovers"
+REPO_NAME = "sonchain"
+INSTALL_PATH = "/opt/sonchain/sonchain.py"
+RELEASE_API_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/releases/latest"
 
 
 
@@ -4780,6 +4786,152 @@ exit $CMD_STATUS
 
  
  
+ 
+ 
+# -------------------- UpdateScript --------------------
+ 
+ 
+class UpdateScript:
+
+
+    @staticmethod
+    def get_latest_release_info():
+
+        import requests
+        try:
+            response = requests.get(RELEASE_API_URL, timeout=10)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Network Error: {str(e)}")
+            return None
+
+
+
+    @staticmethod
+    def backup_file():
+
+        if not os.path.exists(INSTALL_PATH):
+            print(f"Error: Main script not found at {INSTALL_PATH}")
+            return False
+        try:
+            backup_path = f"{INSTALL_PATH}.bak"
+            os.replace(INSTALL_PATH, backup_path)
+            print(f"Backup created: {backup_path}")
+            return backup_path
+        except Exception as e:
+            print(f"Backup failed: {str(e)}")
+            return None
+
+
+
+
+    @staticmethod
+    def download_asset(asset_url):
+
+        import requests
+        try:
+            response = requests.get(asset_url, timeout=10)
+            response.raise_for_status()
+            return response.content
+        except requests.exceptions.RequestException as e:
+            print(f"Download failed: {str(e)}")
+            return None
+
+
+
+    @staticmethod
+    def update_script():
+
+        release_info = UpdateScript.get_latest_release_info()
+        if not release_info:
+            return False
+
+        latest_version = release_info.get("tag_name", "").lstrip("v")
+        if VERSION == latest_version:
+            print("✓ Already up-to-date")
+            return True
+
+
+        asset = next((a for a in release_info.get("assets", []) 
+                    if a.get("name") == "sonchain.py"), None)
+        if not asset:
+            print("✗ Asset not found")
+            return False
+
+        temp_path = None
+        backup_path = None
+        try:
+
+            backup_path = UpdateScript.backup_file()
+            if not backup_path:
+                return False
+
+
+            new_script = UpdateScript.download_asset(asset["browser_download_url"])
+            if not new_script:
+                raise RuntimeError("Download failed")
+
+
+            temp_path = f"{INSTALL_PATH}.tmp"
+            with open(temp_path, "wb") as f:
+                f.write(new_script)
+
+
+            os.replace(temp_path, INSTALL_PATH)
+            os.chmod(INSTALL_PATH, 0o755)
+            print("✓ Update successful")
+
+
+            os.remove(backup_path)
+            return True
+
+        except Exception as e:
+            print(f"✗ Critical error: {str(e)}. Restoring backup...")
+
+            if backup_path and os.path.exists(backup_path):
+                os.replace(backup_path, INSTALL_PATH)
+                print("✓ Previous version restored")
+            return False
+
+        finally:
+
+            for path in [temp_path, backup_path]:
+                if path and os.path.exists(path):
+                    try:
+                        os.remove(path)
+                    except:
+                        pass
+
+
+
+
+    @staticmethod
+    def handle_script_update():
+        print(f"{color.BORDER_COLOR}╔{'―'*32}╗{color.RESET}")
+        print(f"{color.BORDER_COLOR}║{color.HEADER_COLOR}{' Update Script '.center(32)}{color.RESET}{color.BORDER_COLOR}║{color.RESET}")
+        print(f"{color.BORDER_COLOR}╠{'―'*32}╣{color.RESET}")
+
+
+        choice = input("Check for updates? [Y/n] ").strip().lower()
+        
+        if choice not in {'', 'y'}:
+            print("Update cancelled")
+            return
+
+        try:
+            success = UpdateScript.update_script()
+            if success:
+                print(f"\nUpdate applied successfully! Run the script again using: {color.VERSION_COLOR}sonchain{color.RESET}")
+                sys.exit(0)
+            else:
+                print("\nUpdate check completed")
+        except Exception as e:
+            print(f"\nFatal error: {str(e)}")
+        
+
+        input("Press Enter to return to the main menu...")
+ 
 
 
 # -------------------- Menu Manager --------------------
@@ -4793,7 +4945,7 @@ class MenuManager:
     def display_main_menu():
         SystemUtils.clear_screen()
         
-        script_version = "v1.1"
+        script_version = f"v{VERSION}"
         github_link    = "Github.com/Kalilovers"
         
 
@@ -4814,7 +4966,8 @@ class MenuManager:
             "5 | ProxyChains Setup",
             "6 | DnsSon Setup",
             "7 | ProxySon Setup",
-            "8 | Uninstall"
+            "8 | Update Script",
+            "9 | Uninstall"
         ]
         
         for item in menu_items:
@@ -5235,6 +5388,10 @@ class MenuManager:
 
                 #----------------------------------Uninstall-------------------------------------------
                 elif choice == '8':
+                    UpdateScript.handle_script_update()
+
+                #----------------------------------Uninstall-------------------------------------------
+                elif choice == '9':
                     MenuManager.handle_uninstall()
 
                 #----------------------------------Exit-------------------------------------------
