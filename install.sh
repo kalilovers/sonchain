@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.0.2 (Resilient Update)
+# Version: 1.3.0 (Stable Release Installer)
 # License: MIT
 
 set -euo pipefail
@@ -87,13 +87,13 @@ install_dependencies() {
 
     echo -e "${GREEN}Installing Python packages...${NC}"
     python3 -m pip install --user --disable-pip-version-check --no-warn-script-location \
-        -q requests websockets cryptography || {
+        -q requests packaging || {
         echo -e "${RED}Python package installation failed!${NC}" >&2
         exit 1
     }
 
     echo -e "${GREEN}Verifying core components...${NC}"
-    local critical_commands=("python3" "iptables" "curl" "git")
+    local critical_commands=("python3" "iptables" "curl" "git" "jq")
     local missing=()
     
     for cmd in "${critical_commands[@]}"; do
@@ -109,19 +109,77 @@ install_dependencies() {
     echo -e "\n${GREEN}All critical dependencies verified!${NC}"
 }
 
+fetch_latest_release() {
+    echo -e "${YELLOW}Fetching latest release info...${NC}" >&2
+    local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
+    
+
+    local release_info
+    release_info=$(curl -fsSL "$api_url" 2>/dev/null) || die "Failed to connect to GitHub"
+    
+
+    if ! jq -e '.assets' <<< "$release_info" >/dev/null; then
+        die "Invalid GitHub API response"
+    fi
+    
+
+    local asset_url
+    asset_url=$(jq -r '.assets[] | select(.name == "sonchain.py").browser_download_url' <<< "$release_info" | tr -d '\r\n')
+    
+    [[ -z "$asset_url" || "$asset_url" == "null" ]] && die "Asset 'sonchain.py' not found"
+    
+    echo "$asset_url"
+}
+
 setup_application() {
     echo -e "${YELLOW}Setting up Sonchain...${NC}"
     
-    sudo mkdir -p "$INSTALL_DIR"
+
+    sudo mkdir -p "$INSTALL_DIR" || die "❌ Directory creation failed"
     sudo chmod 755 "$INSTALL_DIR"
 
-    echo -e "${YELLOW}Downloading from public repository...${NC}"
-    sudo curl -fsSL "https://raw.githubusercontent.com/$REPO_OWNER/$REPO_NAME/main/sonchain.py" \
-        -o "$INSTALL_DIR/sonchain.py"
-
-    sudo chmod 755 "$INSTALL_DIR/sonchain.py"
+    echo -e "${YELLOW}Downloading latest release...${NC}"
+    local download_url
+    download_url=$(fetch_latest_release)
     
-    sudo ln -sf "$INSTALL_DIR/sonchain.py" "/usr/local/bin/sonchain"
+
+    [[ "$download_url" =~ ^https://github.com/.*/releases/download/.*/sonchain.py$ ]] || die "❌ Invalid URL pattern"
+
+
+    local temp_file
+    temp_file=$(mktemp -p "$INSTALL_DIR" sonchain.py.XXXXXXXXXX)
+
+
+    if ! sudo curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "$temp_file" "$download_url"; then
+        sudo rm -f "$temp_file"
+        die "❌ Download failed! Check network connection"
+    fi
+
+
+    local backup_file
+    if [[ -f "${INSTALL_DIR}/sonchain.py" ]]; then
+        backup_file="${INSTALL_DIR}/sonchain.py.bak.$(date +%s)"
+        sudo mv -f "${INSTALL_DIR}/sonchain.py" "$backup_file" || die "❌ Backup failed"
+        echo -e "${GREEN}✔ Backup created: $(basename "$backup_file")${NC}"
+    fi
+
+
+    if sudo mv -f "$temp_file" "${INSTALL_DIR}/sonchain.py"; then
+        sudo rm -f "$temp_file"
+    else
+        [[ -n "$backup_file" ]] && sudo mv -f "$backup_file" "${INSTALL_DIR}/sonchain.py"
+        sudo rm -f "$temp_file"
+        die "❌ Atomic replacement failed"
+    fi
+
+
+    sudo chmod 755 "${INSTALL_DIR}/sonchain.py"
+    sudo ln -sfT "${INSTALL_DIR}/sonchain.py" "/usr/local/bin/${SCRIPT_NAME}" || die "❌ Symlink creation failed"
+
+
+    sudo rm -f "${INSTALL_DIR}"/sonchain.py.bak.* 2>/dev/null
+
+    echo -e "${GREEN}✅ Successfully installed latest version!${NC}"
 }
 
 main() {
@@ -130,10 +188,10 @@ main() {
     install_dependencies
     setup_application
 
-    echo -e "\n${GREEN}Successfully installed!${NC}"
-    echo -e "\n${GREEN}https://github.com/kalilovers/sonchain${NC}"
-    echo -e "Run the application with: ${YELLOW}$SCRIPT_NAME${NC}"
-    echo -e "Uninstall with: ${YELLOW}sudo $SCRIPT_NAME --uninstall${NC}"
+    echo -e "\n${GREEN}✓ Successfully installed!${NC}"
+    echo -e "\n${GREEN}https://github.com/${REPO_OWNER}/${REPO_NAME}${NC}"
+    echo -e "Run: ${YELLOW}${SCRIPT_NAME}${NC}"
+    echo -e "Update: ${YELLOW}${SCRIPT_NAME} --update${NC}"
 }
 
 main
