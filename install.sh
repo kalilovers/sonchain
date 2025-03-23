@@ -179,7 +179,6 @@ setup_application() {
 
     sudo rm -f "${INSTALL_DIR}"/sonchain.py.bak.* 2>/dev/null
 
-    echo -e "${GREEN}✅ Successfully installed latest version!${NC}"
 }
 
 main() {
@@ -188,10 +187,9 @@ main() {
     install_dependencies
     setup_application
 
-    echo -e "\n${GREEN}✓ Successfully installed!${NC}"
-    echo -e "\n${GREEN}https://github.com/${REPO_OWNER}/${REPO_NAME}${NC}"
-    echo -e "Run: ${YELLOW}${SCRIPT_NAME}${NC}"
-    echo -e "Update: ${YELLOW}${SCRIPT_NAME} --update${NC}"
+    echo -e "\n${GREEN}✅ Successfully installed latest version!${NC}"
+    echo -e "\n${GREEN}Github : https://github.com/${REPO_OWNER}/${REPO_NAME}${NC}"
+    echo -e "\nRun: ${YELLOW}${SCRIPT_NAME}${NC}"
 }
 
 main
