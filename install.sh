@@ -188,8 +188,8 @@ main() {
     setup_application
 
     echo -e "\n${GREEN}✅ Successfully installed latest version!${NC}"
-    echo -e "\n${GREEN}Github : https://github.com/${REPO_OWNER}/${REPO_NAME}${NC}"
-    echo -e "\nRun: ${YELLOW}${SCRIPT_NAME}${NC}"
+    echo -e "\nGithub : ${GREEN}https://github.com/${REPO_OWNER}/${REPO_NAME}${NC}"
+    echo -e "\nRun With : ${YELLOW}${SCRIPT_NAME}${NC}\n"
 }
 
 main
