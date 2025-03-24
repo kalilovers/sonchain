@@ -1467,7 +1467,7 @@ Confirm the prompt > if confirmed, "ProxySon" will be removed.
 
 Special thanks to:
 - **Channel and group https://t.me/OPIran_official :** which helps increase public knowledge by sharing practical tools, projects and technical content.
-- **channel and site Digitalvps :** which provided significant assistance by providing the equipment needed for easier testing and review.
+- **Channel and site Digitalvps :** which provided significant assistance by providing the equipment needed for easier testing and review.
 
 
 
