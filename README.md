@@ -1,3 +1,12 @@
+<p align="center" dir="ltr">
+  <a href="/README-Eng.md">English</a> &nbsp; | &nbsp; <a href="/README.md">فارسی</a>
+</p>
+
+
+<br>
+
+
+
 
 <h1 align="center" dir="rtl">
   &#x200F;🚀Sonchain - ابزاری مبتنی بر شبکه 
