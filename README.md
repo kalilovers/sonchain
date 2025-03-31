@@ -383,6 +383,7 @@ nyx
     <li><b>SOCKS Settings Section:</b> The port and IP of the SOCKS output (displayed only if valid or available)</li>
     <li><b>DNS Settings Section:</b> The DNS resolve protocol (displayed only if valid or available)</li>
     <li><b>Logging Section:</b> Displays the log path if enabled, etc.</li>
+    <li><b>Connection Status section:</b> Displays the connection status - the result is displayed for up to 10 seconds.</li>
     <li><b>If not present:</b> If <code>dante-client</code> or the <code>socks.conf</code> configuration file is missing, or if other issues occur, an appropriate message is displayed.</li>
   </ul>
 
@@ -436,6 +437,7 @@ nyx
     <li><b>Destination Section:</b> The DNS destination set for temporary configuration in <code>resolv.conf</code> and in <code>iptables</code> when using this tool.</li>
     <li><b>Command Section:</b> Displays the command configured to be executed by <code>proxyson</code>.</li>
     <li><b>IPTables Rules Section:</b> Shows the current status of <code>iptables</code> rules – in the current image, "Not Active" indicates that the rules are not currently in use, which is normal since they are applied temporarily.</li>
+    <li><b>Connection Status section:</b> Displays the connection status - the result is displayed for up to 10 seconds.</li>
     <li><b>If not present:</b> If the <code>proxyson</code> file does not exist, or if other issues occur, an appropriate message is displayed.</li>
   </ul>
 
@@ -497,12 +499,15 @@ nyx
 &nbsp;
 
 <details>
-  <summary dir="ltr" style="text-align: left;">1 | Setup Dante|Socksify + Tor</summary>
+  <summary dir="ltr" style="text-align: left;">1 | Setup Socksify + Tor + Proxyson+Dnsson</summary>
 
   <p dir="ltr" style="text-align: left;">
   
   🧰 **This option is used for 'Automatic Installation and Synchronization of Socksify, Dnsson, and Proxyson with Tor'.**
-  
+  <br> 🔹 **It is recommended to run the command <code>source ~/.bashrc</code> after the installation is complete.**
+  <br> 🔹 **It is recommended to reboot the server after the installation is complete.**
+  <br> 🔹 **After the installation is complete, wait a few minutes for the "Tor" connection to be established. You can also check the connection status in the status menus.**
+
   <br><br> To begin after selecting option 1:
   <br><br> 1_ Confirm the prompt > if confirmed, "Tor, Socksify, Dnsson, and Proxyson" will be cleanly removed for reinstallation.
   <p align="center">
@@ -538,6 +543,7 @@ nyx
   <p dir="ltr" style="text-align: left;">
   
   🧰 **This option is used for 'Automatic Installation and Synchronization of ProxyChains-Ng with Tor'.**  
+  <br> 🔹 **After the installation is complete, wait a few minutes for the "Tor" connection to be established. You can also check the connection status in the status menus.**
 
   <br><br> To begin after selecting option 2:
   <br><br> 1_ Confirm the prompt > if confirmed, "Tor and ProxyChains" will be cleanly removed for reinstallation.
@@ -618,6 +624,7 @@ nyx
  <br> 🔹 **If the process fails or is canceled by the user > any installed components will be removed**
  <br> 🔹 **If connection fails due to DNS issues > the script will first attempt to temporarily adjust DNS settings to resolve the issue**
  <br> 🔹 **After checking your server’s connectivity to the official Tor repository, the script will install the latest version; if unsuccessful (due to censorship, destination blockage, etc.), it will install via your system’s official repositories.**
+ <br> 🔹 **After the installation is complete, wait a few minutes for the "Tor" connection to be established. You can also check the connection status in the status menus.**
 
   <br><br> To begin after selecting option 2:
   <br><br> 1_ Confirm the prompt > if confirmed, "Tor" will be cleanly removed for reinstallation.
@@ -764,6 +771,7 @@ Confirm the prompt > if confirmed, "Tor" will be removed.
     <li><b>SOCKS Settings Section:</b> The port and IP of the SOCKS output (displayed only if valid or available)</li>
     <li><b>DNS Settings Section:</b> The DNS Resolve protocol (displayed only if valid or available)</li>
     <li><b>Logging Section:</b> Displays the log path if enabled, etc.</li>
+    <li><b>Connection Status section:</b> Displays the connection status - the result is displayed for up to 10 seconds.</li>
     <li><b>If not present:</b> If <code>dante-client</code> or the <code>socks.conf</code> config file is missing, or if other issues occur, an appropriate message is displayed.</li>
   </ul>
 
@@ -779,6 +787,8 @@ Confirm the prompt > if confirmed, "Tor" will be removed.
 🧰 **This option is used to 'Install Socksify'.**
 
  <br> 🔹 **If the process fails or is canceled by the user > any installed components will be removed**
+ <br> 🔹 **It is recommended to run the command <code>source ~/.bashrc</code> after the installation is complete.**
+ <br> 🔹 **It is recommended to reboot the server after the installation is complete.**
  <br> 🔹 **If connection fails due to DNS issues > the script will first attempt to temporarily adjust DNS settings to resolve the issue**
 
   <br><br> To begin after selecting option 2:
@@ -1134,6 +1144,7 @@ Confirm the prompt > if confirmed, "ProxyChains" will be removed.
   <p dir="ltr" style="text-align: left;">
    
  🧰 **This menu is designed for 'DnsSon Management'.**
+ <br> 🔹 **This tool cannot be used alone and requires "Tor" (or another proxy) to be installed and synchronized with that.**
 
 ![image](https://github.com/kalilovers/sonchain/blob/main/assets/images/menu/dnssonmenu.png)
 
@@ -1262,6 +1273,7 @@ Confirm the prompt > if confirmed, "DnsSon" will be removed.
   <p dir="ltr" style="text-align: left;">
    
  🧰 **This menu is designed for 'ProxySon Management'.**
+ <br> 🔹 **This tool cannot be used alone and requires "Tor" (or another proxy) + Proxychains or Socksify to be installed and synchronized with them.**
 
 ![image](https://github.com/kalilovers/sonchain/blob/main/assets/images/menu/proxysonmenu.png)
 
@@ -1284,6 +1296,7 @@ Confirm the prompt > if confirmed, "DnsSon" will be removed.
     <li><b>Destination Section:</b> The DNS destination set for temporary configuration in <code>resolv.conf</code> and in <code>iptables</code> when using this tool.</li>
     <li><b>Command Section:</b> Displays the command configured to be executed by <code>proxyson</code>.</li>
     <li><b>IPTables Rules Section:</b> Shows the current status of <code>iptables</code> rules – in the current image, "Not Active" indicates that the rules are not in use, which is normal since they are applied temporarily.</li>
+    <li><b>Connection Status section:</b> Displays the connection status - the result is displayed for up to 10 seconds.</li>
     <li><b>If not present:</b> If the <code>proxyson</code> file is missing, or if other issues occur, an appropriate message is displayed.</li>
   </ul>
 
