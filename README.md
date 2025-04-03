@@ -24,7 +24,7 @@
 
 <p align="center" dir="ltr">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Version-2.0.1-green.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.0.2-green.svg" alt="Version">
   <img src="https://img.shields.io/badge/Python->=3.7-blue.svg" alt="Python">
 </p>
 
@@ -41,7 +41,7 @@
 <tr>
 <td>
 
-**SonChain Version v2.0.1**
+**SonChain Version v2.0.2**
 
 ## 🔍 Introduction & Features
 
@@ -327,6 +327,7 @@ nyx
 <summary>1️⃣ Status</summary>
   
   🧰 **This menu is used for 'Checking the status of services (Tor, ProxyChains, etc.)'.**
+  <br><br>⚠️**Caution: Canceling during the connection test in the Status Menus can cause problems with settings such as DNS and etc.. on the server, so wait until the connection test is complete.**
 
   &nbsp;
   
