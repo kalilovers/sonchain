@@ -28,7 +28,7 @@
 
 <p align="center" dir="rtl">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Version-2.0.1-green.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.0.2-green.svg" alt="Version">
   <img src="https://img.shields.io/badge/Python->=3.7-blue.svg" alt="Python">
 </p>
 
@@ -61,7 +61,7 @@
 <tr>
 <td>
 
-&#x200F; ****SonChain نسخه 2.0.1****
+&#x200F; ****SonChain نسخه 2.0.2****
 
 ## 🔍 معرفی و قابلیت‌ها
 
@@ -374,6 +374,7 @@ nyx
  
    
  🧰 **این منو برای 'بررسی وضعیت سرویس ها (Tor، ProxyChains و غیره)' استفاده می‌شود.**
+ <br><br>⚠️**احتیاط: لغو/کنسل در حین تست اتصال در منوهای وضعیت می تواند باعث ایجاد مشکلاتی در تنظیماتی مانند DNS و غیره در سرور شود، بنابراین تا پایان تست اتصال صبر کنید.**
 
  &nbsp;
  
