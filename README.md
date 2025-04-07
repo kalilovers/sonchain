@@ -1501,7 +1501,8 @@ Special thanks to:
 <h2>📞 Contact me</h2>
 <p>
 <ul>
-<li>Use the GitHub Issue section to contact me.
+<li>Email : kaliloverscontact@gmail.com
+<li>Or Use the GitHub Issue section to contact me.
 </ul>
 </p>
 
