@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.3.0 (Stable Release Installer)
+# Version: 1.4.1 (Resolv.conf Optimized)
 # License: MIT
 
 set -euo pipefail
@@ -19,6 +19,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+# ---------------------- Core Functions ----------------------
 die() {
     echo -e "${RED}Error: $1${NC}" >&2
     exit 1
@@ -58,6 +59,90 @@ check_privileges() {
     fi
 }
 
+# ---------------------- Enhanced Package Check ----------------------
+is_package_installed() {
+    local package="$1"
+    
+    # Method 1: Check binary existence
+    if command -v "$package" &>/dev/null; then
+        return 0
+    fi
+    
+    # Method 2: Check dpkg database
+    if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "install ok installed"; then
+        return 0
+    fi
+    
+    # Method 3: Check apt policy (improved regex)
+    local policy_output
+    policy_output=$(apt-cache policy "$package" 2>/dev/null)
+    if [[ "$policy_output" =~ Installed:[[:space:]]+([^[:space:]]+) ]]; then
+        local installed_status="${BASH_REMATCH[1]}"
+        if [[ "$installed_status" != "(none)" ]]; then
+            return 0
+        fi
+    fi
+    
+    # Method 4: Remove service check for resolvconf (doesn't have a service)
+    return 1
+}
+
+# ---------------------- resolvconf Handling ----------------------
+handle_resolvconf() {
+    echo -e "${YELLOW}Handling resolvconf installation...${NC}"
+
+    # Check if already installed using 4 methods
+    if is_package_installed "resolvconf"; then
+        echo -e "${GREEN}✔ resolvconf is already installed (verified by multiple checks).${NC}"
+        return 0
+    fi
+
+    # Backup resolv.conf with metadata
+    echo -e "${YELLOW}Backing up resolv.conf state...${NC}"
+    local RESOLV_BACKUP=$(mktemp)
+    local RESOLV_TYPE=$(stat -c "%F" /etc/resolv.conf)
+    local RESOLV_TARGET=$(readlink -f /etc/resolv.conf 2>/dev/null || true)
+    local RESOLV_PERM=$(stat -c "%a" /etc/resolv.conf)
+    local RESOLV_OWNER=$(stat -c "%u:%g" /etc/resolv.conf)
+    local RESOLV_LOCK=$(lsattr /etc/resolv.conf 2>/dev/null | grep -o '\-i-')
+
+    sudo cp -a /etc/resolv.conf "$RESOLV_BACKUP"
+
+    # Remove immutable flag if present
+    if [[ "$RESOLV_LOCK" == *"i"* ]]; then
+        echo -e "${YELLOW}Unlocking resolv.conf...${NC}"
+        sudo chattr -i /etc/resolv.conf || {
+            sudo rm -f "$RESOLV_BACKUP"
+            die "Failed to unlock resolv.conf"
+        }
+    fi
+
+    # Install resolvconf
+    echo -e "${GREEN}Installing resolvconf...${NC}"
+    sudo apt-get update -qq
+    if ! sudo apt-get install -y resolvconf; then
+        echo -e "${YELLOW}Restoring original resolv.conf...${NC}"
+        sudo cp -af "$RESOLV_BACKUP" /etc/resolv.conf
+        [[ "$RESOLV_LOCK" == *"i"* ]] && sudo chattr +i /etc/resolv.conf
+        sudo rm -f "$RESOLV_BACKUP"
+        die "Failed to install resolvconf"
+    fi
+
+    # Restore original state
+    echo -e "${YELLOW}Restoring original network configuration...${NC}"
+    sudo rm -f /etc/resolv.conf
+    if [[ "$RESOLV_TYPE" == "symbolic link" ]]; then
+        sudo ln -sf "$RESOLV_TARGET" /etc/resolv.conf
+    else
+        sudo cp -af "$RESOLV_BACKUP" /etc/resolv.conf
+    fi
+    sudo chmod "$RESOLV_PERM" /etc/resolv.conf
+    sudo chown "$RESOLV_OWNER" /etc/resolv.conf
+    [[ "$RESOLV_LOCK" == *"i"* ]] && sudo chattr +i /etc/resolv.conf
+    sudo rm -f "$RESOLV_BACKUP"
+}
+
+# ---------------------- Package Installation ----------------------
 install_dependencies() {
     export DEBIAN_FRONTEND=noninteractive
     export APT_LISTCHANGES_FRONTEND=none
@@ -67,7 +152,7 @@ install_dependencies() {
         curl wget sudo ed
         python3 python3-pip python3-venv
         iptables iproute2 ipset 
-        netcat-traditional conntrack resolvconf
+        netcat-traditional conntrack
         build-essential git automake autoconf libtool
         jq logrotate attr dnsutils
     )
@@ -109,32 +194,10 @@ install_dependencies() {
     echo -e "\n${GREEN}All critical dependencies verified!${NC}"
 }
 
-fetch_latest_release() {
-    echo -e "${YELLOW}Fetching latest release info...${NC}" >&2
-    local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
-    
-
-    local release_info
-    release_info=$(curl -fsSL "$api_url" 2>/dev/null) || die "Failed to connect to GitHub"
-    
-
-    if ! jq -e '.assets' <<< "$release_info" >/dev/null; then
-        die "Invalid GitHub API response"
-    fi
-    
-
-    local asset_url
-    asset_url=$(jq -r '.assets[] | select(.name == "sonchain.py").browser_download_url' <<< "$release_info" | tr -d '\r\n')
-    
-    [[ -z "$asset_url" || "$asset_url" == "null" ]] && die "Asset 'sonchain.py' not found"
-    
-    echo "$asset_url"
-}
-
+# ---------------------- Application Setup ----------------------
 setup_application() {
     echo -e "${YELLOW}Setting up Sonchain...${NC}"
     
-
     sudo mkdir -p "$INSTALL_DIR" || die "❌ Directory creation failed"
     sudo chmod 755 "$INSTALL_DIR"
 
@@ -142,19 +205,15 @@ setup_application() {
     local download_url
     download_url=$(fetch_latest_release)
     
-
     [[ "$download_url" =~ ^https://github.com/.*/releases/download/.*/sonchain.py$ ]] || die "❌ Invalid URL pattern"
-
 
     local temp_file
     temp_file=$(mktemp -p "$INSTALL_DIR" sonchain.py.XXXXXXXXXX)
-
 
     if ! sudo curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "$temp_file" "$download_url"; then
         sudo rm -f "$temp_file"
         die "❌ Download failed! Check network connection"
     fi
-
 
     local backup_file
     if [[ -f "${INSTALL_DIR}/sonchain.py" ]]; then
@@ -162,7 +221,6 @@ setup_application() {
         sudo mv -f "${INSTALL_DIR}/sonchain.py" "$backup_file" || die "❌ Backup failed"
         echo -e "${GREEN}✔ Backup created: $(basename "$backup_file")${NC}"
     fi
-
 
     if sudo mv -f "$temp_file" "${INSTALL_DIR}/sonchain.py"; then
         sudo rm -f "$temp_file"
@@ -172,18 +230,35 @@ setup_application() {
         die "❌ Atomic replacement failed"
     fi
 
-
     sudo chmod 755 "${INSTALL_DIR}/sonchain.py"
     sudo ln -sfT "${INSTALL_DIR}/sonchain.py" "/usr/local/bin/${SCRIPT_NAME}" || die "❌ Symlink creation failed"
-
-
     sudo rm -f "${INSTALL_DIR}"/sonchain.py.bak.* 2>/dev/null
-
 }
 
+fetch_latest_release() {
+    echo -e "${YELLOW}Fetching latest release info...${NC}" >&2
+    local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
+    
+    local release_info
+    release_info=$(curl -fsSL "$api_url" 2>/dev/null) || die "Failed to connect to GitHub"
+    
+    if ! jq -e '.assets' <<< "$release_info" >/dev/null; then
+        die "Invalid GitHub API response"
+    fi
+    
+    local asset_url
+    asset_url=$(jq -r '.assets[] | select(.name == "sonchain.py").browser_download_url' <<< "$release_info" | tr -d '\r\n')
+    
+    [[ -z "$asset_url" || "$asset_url" == "null" ]] && die "Asset 'sonchain.py' not found"
+    
+    echo "$asset_url"
+}
+
+# ---------------------- Main Flow ----------------------
 main() {
     check_os
     check_privileges
+    handle_resolvconf  # Changed from install_dependencies
     install_dependencies
     setup_application
 
