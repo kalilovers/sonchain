@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.4.1 (Resolv.conf Optimized)
+# Version: 1.4.2 (Installer Optimized)
 # License: MIT
 
 set -euo pipefail
@@ -60,6 +60,29 @@ check_privileges() {
 }
 
 # ---------------------- Enhanced Package Check ----------------------
+
+test_connection() {
+    local url="$1"
+    local ipv4_url="${url}"
+    local ipv6_url="${url}"
+
+    # Test IPv4 connection
+    if curl --connect-timeout 5 -4 -s -o /dev/null -w "%{http_code}" "$ipv4_url" >/dev/null; then
+        echo "IPv4"
+        return
+    fi
+
+    # Test IPv6 connection
+    if curl --connect-timeout 5 -6 -s -o /dev/null -w "%{http_code}" "$ipv6_url" >/dev/null; then
+        echo "IPv6"
+        return
+    fi
+
+    die "Failed to connect using both IPv4 and IPv6"
+}
+
+
+
 is_package_installed() {
     local package="$1"
     
@@ -171,11 +194,24 @@ install_dependencies() {
     }
 
     echo -e "${GREEN}Installing Python packages...${NC}"
-    python3 -m pip install --user --disable-pip-version-check --no-warn-script-location \
-        -q requests packaging || {
-        echo -e "${RED}Python package installation failed!${NC}" >&2
-        exit 1
-    }
+
+    # Test connection and determine protocol
+    local protocol
+    protocol=$(test_connection "https://files.pythonhosted.org")
+
+    if [[ "$protocol" == "IPv4" ]]; then
+        python3 -m pip install --user --disable-pip-version-check --no-warn-script-location \
+            -q requests packaging || {
+            echo -e "${RED}Python package installation failed!${NC}" >&2
+            exit 1
+        }
+    elif [[ "$protocol" == "IPv6" ]]; then
+        python3 -m pip install --user --disable-pip-version-check --no-warn-script-location \
+            -q requests packaging -i https://mirrors.aliyun.com/pypi/simple/ || {
+            echo -e "${RED}Python package installation failed!${NC}" >&2
+            exit 1
+        }
+    fi
 
     echo -e "${GREEN}Verifying core components...${NC}"
     local critical_commands=("python3" "iptables" "curl" "git" "jq")
@@ -193,7 +229,6 @@ install_dependencies() {
 
     echo -e "\n${GREEN}All critical dependencies verified!${NC}"
 }
-
 # ---------------------- Application Setup ----------------------
 setup_application() {
     echo -e "${YELLOW}Setting up Sonchain...${NC}"
@@ -207,12 +242,23 @@ setup_application() {
     
     [[ "$download_url" =~ ^https://github.com/.*/releases/download/.*/sonchain.py$ ]] || die "❌ Invalid URL pattern"
 
+    # Test connection and determine protocol
+    local protocol
+    protocol=$(test_connection "$download_url")
+
     local temp_file
     temp_file=$(mktemp -p "$INSTALL_DIR" sonchain.py.XXXXXXXXXX)
 
-    if ! sudo curl -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "$temp_file" "$download_url"; then
-        sudo rm -f "$temp_file"
-        die "❌ Download failed! Check network connection"
+    if [[ "$protocol" == "IPv4" ]]; then
+        if ! sudo curl -4 -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "$temp_file" "$download_url"; then
+            sudo rm -f "$temp_file"
+            die "❌ Download failed! Check network connection"
+        fi
+    elif [[ "$protocol" == "IPv6" ]]; then
+        if ! sudo curl -6 -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "$temp_file" "$download_url"; then
+            sudo rm -f "$temp_file"
+            die "❌ Download failed! Check network connection"
+        fi
     fi
 
     local backup_file
@@ -238,19 +284,29 @@ setup_application() {
 fetch_latest_release() {
     echo -e "${YELLOW}Fetching latest release info...${NC}" >&2
     local api_url="https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
-    
-    local release_info
-    release_info=$(curl -fsSL "$api_url" 2>/dev/null) || die "Failed to connect to GitHub"
-    
+
+    # Test connection and determine protocol
+    local protocol
+    protocol=$(test_connection "$api_url")
+
+    # Use the appropriate protocol for curl
+    if [[ "$protocol" == "IPv4" ]]; then
+        local release_info
+        release_info=$(curl -4 -fsSL "$api_url" 2>/dev/null) || die "Failed to connect to GitHub"
+    elif [[ "$protocol" == "IPv6" ]]; then
+        local release_info
+        release_info=$(curl -6 -fsSL "$api_url" 2>/dev/null) || die "Failed to connect to GitHub"
+    fi
+
     if ! jq -e '.assets' <<< "$release_info" >/dev/null; then
         die "Invalid GitHub API response"
     fi
-    
+
     local asset_url
     asset_url=$(jq -r '.assets[] | select(.name == "sonchain.py").browser_download_url' <<< "$release_info" | tr -d '\r\n')
-    
+
     [[ -z "$asset_url" || "$asset_url" == "null" ]] && die "Asset 'sonchain.py' not found"
-    
+
     echo "$asset_url"
 }
 
