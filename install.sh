@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.4.2 (Installer Optimized)
+# Version: 1.4.3 (python3 Installer Optimized)
 # License: MIT
 
 set -euo pipefail
@@ -13,6 +13,11 @@ SCRIPT_NAME="sonchain"
 CONFIG_DIR="/etc/sonchain"
 MIN_DEBIAN=8
 MIN_UBUNTU=18.04
+
+MIN_PYTHON="3.6"
+MIN_PYTHON_MAJOR=3
+MIN_PYTHON_MINOR=6
+
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -142,6 +147,8 @@ handle_resolvconf() {
     sudo rm -f "$RESOLV_BACKUP"
 }
 
+
+
 # ---------------------- Package Installation ----------------------
 install_dependencies() {
     export DEBIAN_FRONTEND=noninteractive
@@ -170,15 +177,45 @@ install_dependencies() {
         echo -e "${YELLOW}Warning: Some packages may have failed to install${NC}" >&2
     }
 
-    echo -e "${GREEN}Installing Python packages...${NC}"
-    if ! python3 -m pip install --user --disable-pip-version-check --no-warn-script-location -q requests packaging; then
+
+
+#=====================================
+#### Installing python3 packs
+
+	echo -e "${GREEN}Checking Python version...${NC}"
+	local python_version python_major python_minor
+	python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" || die "Python3 not found")
+	python_major=$(python3 -c "import sys; print(sys.version_info.major)")
+	python_minor=$(python3 -c "import sys; print(sys.version_info.minor)")
+
+	if [ "$python_major" -lt 3 ]; then
+		die "Python version $python_version is not supported (Minimum required: 3.9)"
+	elif [ "$python_major" -eq 3 ] && [ "$python_minor" -lt 9 ]; then
+		die "Python version $python_version is not supported (Minimum required: 3.9)"
+	fi
+
+
+	echo -e "${GREEN}Installing Python packages...${NC}"
+
+
+    try_pip_install() {
+        python3 -m pip install --user --disable-pip-version-check --no-warn-script-location "$@" -q requests packaging
+    }
+
+    if ! try_pip_install; then
         echo -e "${YELLOW}Retrying with aliyun mirror...${NC}"
-        python3 -m pip install --user --disable-pip-version-check --no-warn-script-location -q requests packaging \
-            -i https://mirrors.aliyun.com/pypi/simple/
+        if ! try_pip_install -i https://mirrors.aliyun.com/pypi/simple/; then
+            echo -e "${YELLOW}Trying with --break-system-packages...${NC}"
+            if ! try_pip_install --break-system-packages; then
+                echo -e "${YELLOW}Retrying with aliyun mirror and --break-system-packages...${NC}"
+                try_pip_install --break-system-packages -i https://mirrors.aliyun.com/pypi/simple/ || \
+                    die "Python package installation failed!"
+            fi
+        fi
     fi
 
     echo -e "${GREEN}Verifying core components...${NC}"
-    local critical_commands=("python3" "iptables" "curl" "git" "jq")
+    local critical_commands=("python3" "curl" "git" "jq")
     local missing=()
     
     for cmd in "${critical_commands[@]}"; do
@@ -193,6 +230,11 @@ install_dependencies() {
 
     echo -e "\n${GREEN}All critical dependencies verified!${NC}"
 }
+
+#=====================================
+
+
+
 
 # ---------------------- Application Setup ----------------------
 setup_application() {
