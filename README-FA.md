@@ -28,7 +28,7 @@
 
 <p align="center" dir="rtl">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Version-2.1.0-green.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.0.0-green.svg" alt="Version">
   <img src="https://img.shields.io/badge/Python->=3.7-blue.svg" alt="Python">
 </p>
 
@@ -61,7 +61,7 @@
 <tr>
 <td>
 
-&#x200F; ****SonChain نسخه 2.1.0****
+&#x200F; ****SonChain نسخه 3.0.0****
 
 ## 🔍 معرفی و قابلیت‌ها
 
@@ -368,6 +368,10 @@ nyx
 ![image](https://github.com/kalilovers/sonchain/blob/main/assets/images/menu/main.png)
 
 &nbsp;
+
+⚠️ **این بخش ممکن است شامل برخی قابلیت و تغییرات جدید نباشد.**
+
+<br>
 
 <details>
 <summary>1️⃣ Status</summary>
