@@ -24,7 +24,7 @@
 
 <p align="center" dir="ltr">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Version-2.1.0-green.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.0.0-green.svg" alt="Version">
   <img src="https://img.shields.io/badge/Python->=3.7-blue.svg" alt="Python">
 </p>
 
@@ -41,7 +41,7 @@
 <tr>
 <td>
 
-**SonChain Version v2.1.0**
+**SonChain Version v3.0.0**
 
 ## 🔍 Introduction & Features
 
@@ -320,8 +320,9 @@ nyx
 
 &nbsp;
 
+⚠️**This section may not include some new features and changes.**
 
-
+<br>
 
 <details>
 <summary>1️⃣ Status</summary>
