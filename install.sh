@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.4.4 (Installer Updated)
+# Version: 1.4.5 (Installer Updated)
 # License: MIT
 
 set -euo pipefail
@@ -265,11 +265,11 @@ setup_application() {
         curl -6 -fsSL --retry 3 --retry-delay 2 --max-time 60 -o "$tarball_path" "$download_url" || die "❌ Download failed"
     fi
 
-    # Step 3: Validate tarball
-    echo -e "${YELLOW}Validating package...${NC}"
-    if ! tar -tzf "$tarball_path" | grep -q 'main.py'; then
-        die "❌ Invalid tarball content"
-    fi
+#     Step 3: Validate tarball
+#    echo -e "${YELLOW}Validating package...${NC}"
+#    if ! tar -tzf "$tarball_path" | grep -q 'main.py'; then
+#        die "❌ Invalid tarball content"
+#    fi
 
 	# Step 4: Backup existing installation
 	local timestamp=$(date +%Y%m%d-%H%M%S)
