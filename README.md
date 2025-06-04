@@ -24,13 +24,13 @@
 
 <p align="center" dir="ltr">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Version-3.0.0-green.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-4.0.0-green.svg" alt="Version">
   <img src="https://img.shields.io/badge/Python->=3.7-blue.svg" alt="Python">
 </p>
 
 <a id="about"></a>
 ## <br><br>🕵🏻‍♂️ Overview:
-**Sonchain is a script under development that combines powerful wrapper software, internal (currently Tor) or external VPN-proxy tools, and other utilities.
+**Sonchain is a script under development that combines powerful wrapper software, internal (currently Tor And Psiphon) or external VPN-proxy tools, and other utilities.
 <br>It enables the execution of commands, programs, and more through a proxy, bypassing network restrictions based on IP, DNS, and geographic limitations, while offering even broader capabilities. This tool is designed for seamless communication, security testing, and specialized use.**
 
 <br><br><br>
@@ -41,11 +41,11 @@
 <tr>
 <td>
 
-**SonChain Version v3.0.0**
+**SonChain Version v4.0.0**
 
 ## 🔍 Introduction & Features
 
-**SonChain** is a script under development that integrates powerful wrapper software and VPN/Proxy tools (currently Tor), allowing you to execute commands and programs through a proxy and bypass network restrictions based on IP, DNS, geographic location, etc. Below are some key applications and technical details:
+**SonChain** is a script under development that integrates powerful wrapper software and VPN/Proxy tools (currently Tor And Psiphon), allowing you to execute commands and programs through a proxy and bypass network restrictions based on IP, DNS, geographic location, etc. Below are some key applications and technical details:
 
 <br> ─| **Executing Commands via Proxy:**
 
@@ -67,13 +67,13 @@ Supported commands based on available tools: dnsson - proxyson - proxychains4 - 
 
 `Or install packages from restricted repositories, etc.`
 
-<br> ─| **Example of Using Tor's Dedicated Ports:**
+<br> ─| **Example of Using Dedicated Ports:**
   
   - **Tor Proxy DNS:** You can use the IP and PORT assigned to Tor’s proxy DNS as a nameserver or resolver proxy capable of bypassing various DNS-based restrictions; these settings only overcome DNS-layer limitations.
-  - **Tor SOCKS Proxy:** The IP and PORT corresponding to Tor’s SOCKS proxy serve as a secure endpoint for transmitting application traffic, desired traffic, or for other network-related uses.
+  - **Tor SOCKS And Psiphon SOCKS|HTTP Proxy:** The IP and PORT corresponding to Tor’s SOCKS proxy serve as a secure endpoint for transmitting application traffic, desired traffic, or for other network-related uses.
 
 <br> ─| **Bypassing Network Restrictions at the Server Level or in Specific Sections:**
-   - By using Tor’s internal DNS or SOCKS to route traffic or resolve domains through a proxy, it enables bypassing restrictions on the entire server or parts such as VPN panels, etc.
+   - By using Tor’s internal DNS or SOCKS + Psiphon SOCKS|HTTP to route traffic or resolve domains through a proxy, it enables bypassing restrictions on the entire server or parts such as VPN panels, etc.
    - Additionally, this tool allows you to run multiple proxy layers simultaneously, in chains, randomly, etc., thereby reducing the risk of detection in security testing or specialized uses.
  - **SonChain** is a flexible solution for bypassing network restrictions that allows users to execute their commands seamlessly via a proxy without needing manual changes, while also benefiting from Tor’s dedicated ports.
 
@@ -86,7 +86,7 @@ Supported commands based on available tools: dnsson - proxyson - proxychains4 - 
 
 **SonChain** at a glance,  
 is a practical solution for bypassing network restrictions based on IP, DNS, geographic location, etc.  
-By combining various tools and offering features such as temporary proxy execution of commands, temporary DNS changes, and support for Tor’s internal SOCKS|DNS, this script provides high flexibility in managing network traffic.  
+By combining various tools and offering features such as temporary proxy execution of commands, temporary DNS changes, and support for Tor’s internal SOCKS|DNS And Psiphon SOCKS|HTTP , this script provides high flexibility in managing network traffic.  
 The ability to use multiple proxy layers in chains, randomly, etc., not only enhances ease of use but also increases anonymity and resistance to detection in security or specialized scenarios, and additional features will be added to this project in the future.
 
 </td>
@@ -126,7 +126,7 @@ The ability to use multiple proxy layers in chains, randomly, etc., not only enh
 <a id="Caution"></a>
 ## ⚠️ Disclaimer:
 This project is intended to facilitate communication between developers and users with restricted repositories and similar scenarios, network testing, and related security applications, as well as the separate use of all features of the **current** tools included in the script;
-- **Tor - ProxyChains - Dante/Socksify** [Official Software]  
+- **Tor - Psiphon - ProxyChains - Dante/Socksify** [Official Software]  
 - **DNSSon & ProxySon**  [Created by the project developer]
 
 <br> By combining various official tools or unofficially enhanced versions and custom-designed scripts.  
@@ -146,10 +146,10 @@ This project is intended to facilitate communication between developers and user
 &nbsp;
 <br>**🔥 "All of the following functionalities will be gradually optimized and enhanced"**
 <br>**🔥 "Many features have been removed from the current version, which will be reintroduced in future versions as needed with optimization"**
-- **✅ Installation/Removal, management, and configuration of Tor, ProxyChain-Ng, and Socksify**
+- **✅ Installation/Removal, management, and configuration of Tor, Psiphon, ProxyChain-Ng, and Socksify**
 - **✅ ProxySon and DnsSon scripts by Kalilovers have been designed for easier usage, to prevent DNS leaks during command execution, and for other user applications.**
 - **✅ Specific status indicators for checking the status of available tools.**
-- **📜 The configuration of Tor, ProxyChain-Ng, and Socksify is initially set up in a basic manner by the script during installation, after which the user can modify and enhance security, etc.**
+- **📜 The configuration of Tor, Psiphon, ProxyChain-Ng, and Socksify is initially set up in a basic manner by the script during installation, after which the user can modify and enhance security, etc.**
 - **✅ Use of interactive menus and the display of colorful reports for an improved user experience.**
 - **✅ Ability to execute directly after installation with the command “sonchain”**
 - **🐧 Tested on Ubuntu 18+ and Debian 8+ operating systems**
@@ -158,7 +158,7 @@ This project is intended to facilitate communication between developers and user
 - **✅ Automatic temporary DNS configuration during installation, in case of issues with the server's current DNS settings.**
 - **✅ Automatic resolution of APT tool issues on the server during installation.**
 - **✅ Automatic removal of installed items in case of installation errors or if canceled by the user.**
-- **✅ When manually editing configuration files, especially the TOR config file, a backup is taken first and then, before saving, a general review of the config content is performed by the script to ensure its correctness, which can be reverted if necessary.**
+- **✅ When manually editing configuration files, especially the TOR And Psiphon config file, a backup is taken first and then, before saving, a general review of the config content is performed by the script to ensure its correctness, which can be reverted if necessary.**
 - **✅ All DNS changes or creation of Iptables rules by DNSSon and PROXYSON are performed as properly as possible and revert to normal at the end, temporarily and without removing file locks or sublinks or interfering with Iptables rules.**
 - **✅ In the design and coding, the script has been developed to handle various conditions, increase operational speed, and certain aspects that require further enhancement will be implemented gradually.**
 
@@ -195,6 +195,13 @@ This project is intended to facilitate communication between developers and user
     </a><br>
     <a href="https://www.inet.no/dante/doc/">
       Main Documentation Page
+    </a>
+  </li>
+
+  <li>
+    <strong>Official Psiphon:</strong><br>
+    <a href="https://pkg.go.dev/github.com/Psiphon-Labs/psiphon-tunnel-core/psiphon#Config">
+      Configuring Psiphon
     </a>
   </li>
   
