@@ -1,6 +1,6 @@
 #!/bin/bash
 # Official Installation Script for Sonchain (Public Version)
-# Version: 1.4.5 (Installer Updated)
+# Version: 1.4.6 (Installer Updated)
 # License: MIT
 
 set -euo pipefail
@@ -205,7 +205,7 @@ install_dependencies() {
 
 
     try_pip_install() {
-        python3 -m pip install --user --disable-pip-version-check --no-warn-script-location "$@" -q requests packaging
+        python3 -m pip install --user --disable-pip-version-check --no-warn-script-location "$@" -q 'requests[socks]' packaging
     }
 
     if ! try_pip_install; then
