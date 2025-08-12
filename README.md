@@ -107,7 +107,6 @@ The ability to use multiple proxy layers in chains, randomly, etc., not only enh
 - [⚙️ Installation](#installation)
 - [📖 Menu & Options Guide](#guide)
 - [📞 Contact](#contact)
-- [🙏 Acknowledgements](#thanks)
 - [🤝 Financial Support](#Financialsupport)
 ---
 
@@ -1483,24 +1482,6 @@ Confirm the prompt > if confirmed, "ProxySon" will be removed.
 
 
 
-
-
-
-
-
-
-
-
-
-<br><br><br>
-
-&nbsp;
-<a id="thanks"></a>
-## 🙏 Thanks and appreciation
-
-Special thanks to:
-- **Channel and group https://t.me/OPIran_official :** which helps increase public knowledge by sharing practical tools, projects and technical content.
-- **Channel and site [Digitalvps](https://t.me/digital_vps) :** which provided significant assistance by providing the equipment needed for easier testing and review.
 
 
 
